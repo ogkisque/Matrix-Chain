@@ -14,7 +14,7 @@ int main() {
     chain.Push(mat4);
 
     std::cout << chain.GetOptimalMultiplyCount() << std::endl;
-
+    std::cout << chain.GetMultiplyCount() << std::endl;
 
     matrix_chain::Chain<int> chain1;
     matrix::Matrix<int> mat5{10, 30};
@@ -26,4 +26,19 @@ int main() {
     chain1.Push(mat7);
 
     std::cout << chain1.GetOptimalMultiplyCount() << std::endl;
+    std::cout << chain1.GetMultiplyCount() << std::endl;
+
+    matrix_chain::Chain<int> chain2;
+    matrix::Matrix<int> mat8{30, 35};
+    matrix::Matrix<int> mat9{35, 15};
+    matrix::Matrix<int> mat10{15, 5};
+    matrix::Matrix<int> mat11{5, 10};
+
+    chain2.Push(mat8);
+    chain2.Push(mat9);
+    chain2.Push(mat10);
+    chain2.Push(mat11);
+
+    std::cout << chain2.GetOptimalMultiplyCount() << std::endl;
+    std::cout << chain2.GetMultiplyCount() << std::endl;
 }

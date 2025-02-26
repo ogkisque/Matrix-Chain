@@ -23,7 +23,7 @@ public:
         sizes_.push_back(mat.GetColumnCount());
     }
 
-    int GetOptimalMultiplyCount() const {
+    std::pair<int, std::vector<int>> GetOptimalMultiplyCountOrder() const {
         int n = sizes_.size() - 1;
         std::vector<std::vector<int>> dp(n + 1, std::vector<int>(n + 1, 0));
         std::vector<std::vector<int>> split(n + 1, std::vector<int>(n + 1, 0));
@@ -43,15 +43,9 @@ public:
 			}
 		}
 
-        std::cout << GetOrderString(1, n, split) << std::endl;
+        std::vector<int> order = GetOrderVector(1, n, split);
 
-        std::vector<int> ord = GetOrderVector(1, n, split);
-
-        for (auto&& elem : ord)
-            std::cout << elem << " ";
-        std::cout << std::endl;
-
-		return dp[1][n];
+		return std::make_pair(dp[1][n], order);
     }
 
     int GetMultiplyCount() const {
@@ -61,6 +55,10 @@ public:
             count += sizes_[0] * sizes_[i] * sizes_[i + 1];
         }
         return count;
+    }
+
+    void DoMultiply(std::vector<int> &order) {
+        
     }
 
 private:

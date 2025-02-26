@@ -1,44 +1,45 @@
 #include "matrix_chain.hpp"
 #include "matrix.hpp"
 
+#include <iostream>
+#include <exception>
+
+namespace
+{
+    template <typename T>
+    void ProcessInput(matrix_chain::Chain<T> &chain, std::istream &in) {
+        int num_sizes = 0;
+        in >> num_sizes;
+
+        if (num_sizes <= 2)
+            throw std::logic_error("Incorrect number of sizes of matrixes");
+
+        size_t size1 = 0;
+        size_t size2 = 0;
+
+        in >> size1;
+
+        for (int i = 1; i < num_sizes; i++) {
+            in >> size2;
+            matrix::Matrix<T> matrix{size1, size2};
+            chain.Push(matrix);
+            size1 = size2;
+        }
+    }
+} // namespace
+
+
 int main() {
     matrix_chain::Chain<int> chain;
-    matrix::Matrix<int> mat1{10, 20};
-    matrix::Matrix<int> mat2{20, 30};
-    matrix::Matrix<int> mat3{30, 40};
-    matrix::Matrix<int> mat4{40, 5};
+    ProcessInput(chain, std::cin);
 
-    chain.Push(mat1);
-    chain.Push(mat2);
-    chain.Push(mat3);
-    chain.Push(mat4);
+    auto optim = chain.GetOptimalMultiplyCountOrder();
+    int optim_count = optim.first;
+    std::vector<int> order = optim.second;
+    int count = chain.GetMultiplyCount();
 
-    std::cout << chain.GetOptimalMultiplyCount() << std::endl;
-    std::cout << chain.GetMultiplyCount() << std::endl;
-
-    matrix_chain::Chain<int> chain1;
-    matrix::Matrix<int> mat5{10, 30};
-    matrix::Matrix<int> mat6{30, 5};
-    matrix::Matrix<int> mat7{5, 60};
-
-    chain1.Push(mat5);
-    chain1.Push(mat6);
-    chain1.Push(mat7);
-
-    std::cout << chain1.GetOptimalMultiplyCount() << std::endl;
-    std::cout << chain1.GetMultiplyCount() << std::endl;
-
-    matrix_chain::Chain<int> chain2;
-    matrix::Matrix<int> mat8{30, 35};
-    matrix::Matrix<int> mat9{35, 15};
-    matrix::Matrix<int> mat10{15, 5};
-    matrix::Matrix<int> mat11{5, 10};
-
-    chain2.Push(mat8);
-    chain2.Push(mat9);
-    chain2.Push(mat10);
-    chain2.Push(mat11);
-
-    std::cout << chain2.GetOptimalMultiplyCount() << std::endl;
-    std::cout << chain2.GetMultiplyCount() << std::endl;
+    for (auto&& elem : order)
+        std::cout << elem << " ";
+    std::cout << std::endl;
+    std::cout << static_cast<double>(count) / optim_count << std::endl;
 }

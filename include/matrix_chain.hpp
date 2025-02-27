@@ -18,15 +18,14 @@ public:
         static_assert(std::is_same_v<std::remove_cvref_t<U>, matrix::Matrix<T>>, 
             "U is not matrix::Matrix<T>");
         
-        chain_.push_back(std::forvard<U>(mat));
-
+        chain_.push_back(std::forward<U>(mat));
         if (chain_.size() == 1)
-            sizes_.push_back(row_count);
+            sizes_.push_back(chain_.back().GetRowCount());
         else
-            if (sizes_.back() != row_count)
+            if (sizes_.back() != chain_.back().GetRowCount())
                 throw std::logic_error("Sizes of matrixes don't match");
 
-        sizes_.push_back(column_count);
+        sizes_.push_back(chain_.back().GetColumnCount());
         assert(chain_.size() + 1 == sizes_.size());
     }
 
@@ -39,7 +38,7 @@ public:
             if (sizes_.back() != chain_.back().GetRowCount())
                 throw std::logic_error("Sizes of matrixes don't match");
 
-        sizes_.push_back(mat.GetColumnCount());
+        sizes_.push_back(chain_.back().GetColumnCount());
         assert(chain_.size() + 1 == sizes_.size());
     }
 

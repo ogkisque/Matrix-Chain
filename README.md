@@ -8,13 +8,8 @@ This project is the implementation of chain of matrices, that are multiplied in 
 
 Cloning repository:
 ```
-git clone --recursive https://github.com/ogkisque/Matrix-Chain.git
+git clone https://github.com/ogkisque/Matrix-Chain.git
 git submodule update --init --recursive
-cd libhayai
-git fetch
-cd ..
-cd Matrix
-git fetch
 ```
 
 If you want to build the project, write this in the project directory:

@@ -2,6 +2,7 @@
 
 #include "matrix.hpp"
 #include <vector>
+#include <list>
 #include <cassert>
 #include <exception>
 #include <iostream>
@@ -21,6 +22,7 @@ public:
                 throw std::logic_error("Sizes of matrixes don't match");
 
         sizes_.push_back(mat.GetColumnCount());
+        assert(chain_.size() + 1 == sizes_.size());
     }
 
     std::pair<int, std::vector<int>> GetOptimalMultiplyCountOrder() const {
@@ -44,21 +46,57 @@ public:
 		}
 
         std::vector<int> order = GetOrderVector(1, n, split);
-
+        assert(order.size() + 1 == chain_.size());
 		return std::make_pair(dp[1][n], order);
     }
 
     int GetMultiplyCount() const {
         int count = 0;
-        for (int i = 1; i < sizes_.size() - 1; i++)
-        {
+        size_t size = sizes_.size();
+        
+        for (int i = 1; i < size - 1; ++i) {
             count += sizes_[0] * sizes_[i] * sizes_[i + 1];
         }
+
         return count;
     }
 
-    void DoMultiply(std::vector<int> &order) {
+    matrix::Matrix<T> DoMultiply(const std::vector<int> &order) const {
+        size_t order_size = order.size();
+        size_t chain_size = chain_.size();
+
+        if (chain_.empty())
+            throw std::runtime_error("The chain of matrix is empty");
+        if (order.empty() || order_size + 1U != chain_size)
+            throw std::runtime_error("The order of multiplication is incorrect");
         
+        std::list<matrix::Matrix<T>> current_chain{chain_.begin(), chain_.end()};
+        auto current_order = order;
+
+        for (size_t i = 0; i < current_order.size(); ++i) {
+            int matrix_i = current_order[i];
+    
+            if (matrix_i < 0 || matrix_i >= current_chain.size())
+                throw std::out_of_range("Invalid value of order");
+            
+            auto it = current_chain.begin();
+            std::advance(it, matrix_i);
+            auto it_next = std::next(it);
+
+            if (it_next == current_chain.end())
+                throw std::out_of_range(std::string("Invalid value of order") + std::to_string(i));
+
+            *it = *it * *it_next;
+            
+            current_chain.erase(it_next);
+            
+            for (size_t j = 0; j < current_order.size(); ++j) {
+                if(current_order[j] > matrix_i)
+                    current_order[j]--;
+            }
+        }
+
+        return current_chain.front();
     }
 
 private:

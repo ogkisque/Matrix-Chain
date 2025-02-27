@@ -9,7 +9,6 @@ option(WITH_TESTS "tests" OFF)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=leak,address,undefined")
 
 add_subdirectory(src)
-add_subdirectory(Matrix)
 
 if (WITH_TESTS)
     find_package(GTest CONFIG REQUIRED)

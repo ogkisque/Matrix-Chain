@@ -30,8 +30,7 @@ namespace
             if (!in.good())
                 throw std::runtime_error("Incorrect input data");
 
-            matrix::Matrix<T> matrix{size1, size2};
-            chain.Push(matrix);
+            chain.Emplace(size1, size2);
             size1 = size2;
         }
     }

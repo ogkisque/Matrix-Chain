@@ -13,12 +13,20 @@ namespace matrix_chain {
 template <typename T>
 class Chain final {
 public:
-    template <typename U>
-    void Push(U &&mat) {
-        static_assert(std::is_same_v<std::remove_cvref_t<U>, matrix::Matrix<T>>, 
-            "U is not matrix::Matrix<T>");
-        
-        chain_.push_back(std::forward<U>(mat));
+    void Push(const matrix::Matrix<T> &mat) {
+        chain_.push_back(mat);
+        if (chain_.size() == 1)
+            sizes_.push_back(chain_.back().GetRowCount());
+        else
+            if (sizes_.back() != chain_.back().GetRowCount())
+                throw std::logic_error("Sizes of matrixes don't match");
+
+        sizes_.push_back(chain_.back().GetColumnCount());
+        assert(chain_.size() + 1 == sizes_.size());
+    }
+
+    void Push(matrix::Matrix<T> &&mat) {
+        chain_.push_back(std::move(mat));
         if (chain_.size() == 1)
             sizes_.push_back(chain_.back().GetRowCount());
         else

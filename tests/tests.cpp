@@ -188,3 +188,72 @@ TEST(MatrixChainTest, Multiply4) {
 
     ASSERT_EQ(matrix1, matrix2);
 }
+
+
+TEST(MatrixChainTest, PushMove) {
+    matrix::Matrix<int> mat1(1000, 200);
+    matrix::Matrix<int> mat2(200, 100);
+    matrix::Matrix<int> mat3(100, 100);
+    matrix::Matrix<int> mat4(100, 1000);
+    matrix::Matrix<int> mat5(1000, 10);
+
+    for (size_t i = 0; i < 1000; ++i)
+        for (size_t j = 0; j < 200; ++j)
+            mat1[i][j] = 1;
+
+    for (size_t i = 0; i < 200; ++i)
+        for (size_t j = 0; j < 100; ++j)
+            mat2[i][j] = 2;
+
+    for (size_t i = 0; i < 100; ++i)
+        for (size_t j = 0; j < 100; ++j)
+            mat3[i][j] = 3;
+
+    for (size_t i = 0; i < 100; ++i)
+        for (size_t j = 0; j < 1000; ++j)
+            mat4[i][j] = 2;
+
+    for (size_t i = 0; i < 1000; ++i)
+        for (size_t j = 0; j < 10; ++j)
+            mat5[i][j] = 3;
+                
+    matrix_chain::Chain<int> chain;
+    chain.Push(std::move(mat1));
+    chain.Push(std::move(mat2));
+    chain.Push(std::move(mat3));
+    chain.Push(std::move(mat4));
+    chain.Push(std::move(mat5));
+
+    auto optim = chain.GetOptimalMultiplyCountOrder();
+    int optim_count = optim.first;
+    std::vector<int> optimal_order = optim.second;
+    std::vector<int> native_order = {0, 1, 2, 3};
+    auto matrix1 = chain.DoMultiply(native_order);
+    auto matrix2 = chain.DoMultiply(optimal_order);
+
+    ASSERT_EQ(matrix1, matrix2);
+}
+
+TEST(MatrixChainTest, Emplace) {
+    std::vector<int> v1{1, 2, 1, 0, -2, 1, 2, -1};
+    std::vector<int> v2{1, 0, -1, 0, 2, 0, 3, -3};
+    std::vector<int> v3{1, 2, 1, 3, -2, 0, -3, 3, 1, -2, 0, 4, 1, 2, 0, -1};
+    std::vector<int> result{4, -12, 5, 41, 0, 4, 1, -1, 2, -16, 0, 23, -2, 16, 0,-23};
+
+    matrix_chain::Chain<int> chain;
+    chain.Emplace(4, 2, v1.begin(), v1.end());
+    chain.Emplace(2, 4, v2.begin(), v2.end());
+    chain.Emplace(4, 4, v3.begin(), v3.end());
+
+    auto optim = chain.GetOptimalMultiplyCountOrder();
+    int optim_count = optim.first;
+    std::vector<int> optimal_order = optim.second;
+    std::vector<int> native_order = {0, 1};
+    auto matrix1 = chain.DoMultiply(native_order);
+    auto matrix2 = chain.DoMultiply(optimal_order);
+
+    ASSERT_EQ(matrix1, matrix2);
+    for (size_t i = 0; i < 4; ++i)
+        for (size_t j = 0; j < 4; ++j)
+            ASSERT_EQ(result[i * 4 + j], matrix1[i][j]);
+}

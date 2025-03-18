@@ -5,7 +5,7 @@ matrix_chain::Chain<int> CreateMatrixChain();
 
 static void BM_NaiveMatrixMultiply(benchmark::State& state) {
     auto chain = CreateMatrixChain();
-    std::vector<int> naive_order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    std::vector<size_t> naive_order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
 
     for (auto _ : state) {
         chain.DoMultiply(naive_order);
@@ -15,7 +15,7 @@ static void BM_NaiveMatrixMultiply(benchmark::State& state) {
 
 static void BM_OptimalMatrixMultiply(benchmark::State& state) {
     auto chain = CreateMatrixChain();
-    std::vector<int> optimal_order = chain.GetOptimalMultiplyCountOrder().second;
+    std::vector<size_t> optimal_order = chain.GetOptimalMultiplyCountOrder().second;
 
     for (auto _ : state) {
         chain.DoMultiply(optimal_order);

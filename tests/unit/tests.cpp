@@ -16,12 +16,10 @@ TEST(MatrixChainTest, MultiplyOrder1) {
     chain.Push(mat3);
     chain.Push(mat4);
 
-    auto optim = chain.GetOptimalMultiplyCountOrder();
-    int optim_count = optim.first;
-    std::vector<int> order = optim.second;
-    int count = chain.GetMultiplyCount();
+    auto &&[optim_count, order] = chain.GetOptimalMultiplyCountOrder();
+    size_t count = chain.GetMultiplyCount();
 
-    std::vector<int> right_order{1, 0, 2};
+    std::vector<size_t> right_order {1, 0, 2};
 
     ASSERT_EQ(optim_count, 9375);
     ASSERT_EQ(count, 19500);
@@ -38,12 +36,10 @@ TEST(MatrixChainTest, MultiplyOrder2) {
     chain.Push(mat2);
     chain.Push(mat3);
 
-    auto optim = chain.GetOptimalMultiplyCountOrder();
-    int optim_count = optim.first;
-    std::vector<int> order = optim.second;
-    int count = chain.GetMultiplyCount();
+    auto &&[optim_count, order] = chain.GetOptimalMultiplyCountOrder();
+    size_t count = chain.GetMultiplyCount();
 
-    std::vector<int> right_order{0, 1};
+    std::vector<size_t> right_order {0, 1};
 
     ASSERT_EQ(optim_count, 4500);
     ASSERT_EQ(count, 4500);
@@ -51,10 +47,10 @@ TEST(MatrixChainTest, MultiplyOrder2) {
 }
 
 TEST(MatrixChainTest, Multiply1) {
-    std::vector<int> v1{1, 2, 1, 0, -2, 1, 2, -1};
-    std::vector<int> v2{1, 0, -1, 0, 2, 0, 3, -3};
-    std::vector<int> v3{1, 2, 1, 3, -2, 0, -3, 3, 1, -2, 0, 4, 1, 2, 0, -1};
-    std::vector<int> result{4, -12, 5, 41, 0, 4, 1, -1, 2, -16, 0, 23, -2, 16, 0,-23};
+    std::vector<int> v1 {1, 2, 1, 0, -2, 1, 2, -1};
+    std::vector<int> v2 {1, 0, -1, 0, 2, 0, 3, -3};
+    std::vector<int> v3 {1, 2, 1, 3, -2, 0, -3, 3, 1, -2, 0, 4, 1, 2, 0, -1};
+    std::vector<int> result {4, -12, 5, 41, 0, 4, 1, -1, 2, -16, 0, 23, -2, 16, 0, -23};
 
     matrix::Matrix<int> mat1(4, 2, v1.begin(), v1.end());
     matrix::Matrix<int> mat2(2, 4, v2.begin(), v2.end());
@@ -65,10 +61,9 @@ TEST(MatrixChainTest, Multiply1) {
     chain.Push(mat2);
     chain.Push(mat3);
 
-    auto optim = chain.GetOptimalMultiplyCountOrder();
-    int optim_count = optim.first;
-    std::vector<int> optimal_order = optim.second;
-    std::vector<int> native_order = {0, 1};
+    auto &&[optim_count, optimal_order] = chain.GetOptimalMultiplyCountOrder();
+    
+    std::vector<size_t> native_order = {0, 1};
     auto matrix1 = chain.DoMultiply(native_order);
     auto matrix2 = chain.DoMultiply(optimal_order);
 
@@ -77,7 +72,6 @@ TEST(MatrixChainTest, Multiply1) {
         for (size_t j = 0; j < 4; ++j)
             ASSERT_EQ(result[i * 4 + j], matrix1[i][j]);
 }
-
 
 TEST(MatrixChainTest, Multiply2) {
     matrix::Matrix<int> mat1(100, 1);
@@ -91,10 +85,8 @@ TEST(MatrixChainTest, Multiply2) {
     chain.Push(mat3);
     chain.Push(mat4);
 
-    auto optim = chain.GetOptimalMultiplyCountOrder();
-    int optim_count = optim.first;
-    std::vector<int> optimal_order = optim.second;
-    std::vector<int> native_order = {0, 1, 2};
+    auto &&[optim_count, optimal_order] = chain.GetOptimalMultiplyCountOrder();
+    std::vector<size_t> native_order = {0, 1, 2};
     auto matrix1 = chain.DoMultiply(native_order);
     auto matrix2 = chain.DoMultiply(optimal_order);
 
@@ -127,7 +119,7 @@ TEST(MatrixChainTest, Multiply3) {
     for (size_t i = 0; i < 10000; ++i)
         for (size_t j = 0; j < 11; ++j)
             mat5[i][j] = 3;
-                
+
     matrix_chain::Chain<int> chain;
     chain.Push(mat1);
     chain.Push(mat2);
@@ -135,10 +127,8 @@ TEST(MatrixChainTest, Multiply3) {
     chain.Push(mat4);
     chain.Push(mat5);
 
-    auto optim = chain.GetOptimalMultiplyCountOrder();
-    int optim_count = optim.first;
-    std::vector<int> optimal_order = optim.second;
-    std::vector<int> native_order = {0, 1, 2, 3};
+    auto &&[optim_count, optimal_order] = chain.GetOptimalMultiplyCountOrder();
+    std::vector<size_t> native_order = {0, 1, 2, 3};
     auto matrix1 = chain.DoMultiply(native_order);
     auto matrix2 = chain.DoMultiply(optimal_order);
 
@@ -171,7 +161,7 @@ TEST(MatrixChainTest, Multiply4) {
     for (size_t i = 0; i < 1000; ++i)
         for (size_t j = 0; j < 10; ++j)
             mat5[i][j] = 3;
-                
+
     matrix_chain::Chain<int> chain;
     chain.Push(mat1);
     chain.Push(mat2);
@@ -179,16 +169,13 @@ TEST(MatrixChainTest, Multiply4) {
     chain.Push(mat4);
     chain.Push(mat5);
 
-    auto optim = chain.GetOptimalMultiplyCountOrder();
-    int optim_count = optim.first;
-    std::vector<int> optimal_order = optim.second;
-    std::vector<int> native_order = {0, 1, 2, 3};
+    auto &&[optim_count, optimal_order] = chain.GetOptimalMultiplyCountOrder();
+    std::vector<size_t> native_order = {0, 1, 2, 3};
     auto matrix1 = chain.DoMultiply(native_order);
     auto matrix2 = chain.DoMultiply(optimal_order);
 
     ASSERT_EQ(matrix1, matrix2);
 }
-
 
 TEST(MatrixChainTest, PushMove) {
     matrix::Matrix<int> mat1(1000, 200);
@@ -216,7 +203,7 @@ TEST(MatrixChainTest, PushMove) {
     for (size_t i = 0; i < 1000; ++i)
         for (size_t j = 0; j < 10; ++j)
             mat5[i][j] = 3;
-                
+
     matrix_chain::Chain<int> chain;
     chain.Push(std::move(mat1));
     chain.Push(std::move(mat2));
@@ -224,10 +211,8 @@ TEST(MatrixChainTest, PushMove) {
     chain.Push(std::move(mat4));
     chain.Push(std::move(mat5));
 
-    auto optim = chain.GetOptimalMultiplyCountOrder();
-    int optim_count = optim.first;
-    std::vector<int> optimal_order = optim.second;
-    std::vector<int> native_order = {0, 1, 2, 3};
+    auto &&[optim_count, optimal_order] = chain.GetOptimalMultiplyCountOrder();
+    std::vector<size_t> native_order = {0, 1, 2, 3};
     auto matrix1 = chain.DoMultiply(native_order);
     auto matrix2 = chain.DoMultiply(optimal_order);
 
@@ -235,20 +220,18 @@ TEST(MatrixChainTest, PushMove) {
 }
 
 TEST(MatrixChainTest, Emplace) {
-    std::vector<int> v1{1, 2, 1, 0, -2, 1, 2, -1};
-    std::vector<int> v2{1, 0, -1, 0, 2, 0, 3, -3};
-    std::vector<int> v3{1, 2, 1, 3, -2, 0, -3, 3, 1, -2, 0, 4, 1, 2, 0, -1};
-    std::vector<int> result{4, -12, 5, 41, 0, 4, 1, -1, 2, -16, 0, 23, -2, 16, 0,-23};
+    std::vector<int> v1 {1, 2, 1, 0, -2, 1, 2, -1};
+    std::vector<int> v2 {1, 0, -1, 0, 2, 0, 3, -3};
+    std::vector<int> v3 {1, 2, 1, 3, -2, 0, -3, 3, 1, -2, 0, 4, 1, 2, 0, -1};
+    std::vector<int> result {4, -12, 5, 41, 0, 4, 1, -1, 2, -16, 0, 23, -2, 16, 0, -23};
 
     matrix_chain::Chain<int> chain;
     chain.Emplace(4, 2, v1.begin(), v1.end());
     chain.Emplace(2, 4, v2.begin(), v2.end());
     chain.Emplace(4, 4, v3.begin(), v3.end());
 
-    auto optim = chain.GetOptimalMultiplyCountOrder();
-    int optim_count = optim.first;
-    std::vector<int> optimal_order = optim.second;
-    std::vector<int> native_order = {0, 1};
+    auto &&[optim_count, optimal_order] = chain.GetOptimalMultiplyCountOrder();
+    std::vector<size_t> native_order = {0, 1};
     auto matrix1 = chain.DoMultiply(native_order);
     auto matrix2 = chain.DoMultiply(optimal_order);
 

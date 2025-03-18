@@ -1,28 +1,34 @@
-#include <cassert>
-#include <iostream>
-#include <vector>
-#include <ctime>
-#include <vector>
-#include <random>
-#include <algorithm>
-
-#include "hayai.hpp"
-#include "hayai_main.hpp"
 #include "matrix_chain.hpp"
+#include <benchmark/benchmark.h>
 
-matrix_chain::Chain<int> chain;
-std::vector<int> optim_order;
-std::vector<int> naive_order;
+matrix_chain::Chain<int> CreateMatrixChain();
 
-BENCHMARK(MatrixMultiply, Optimal, 1, 10) {
-    auto mat = chain.DoMultiply(optim_order);
+static void BM_NaiveMatrixMultiply(benchmark::State& state) {
+    auto chain = CreateMatrixChain();
+    std::vector<size_t> naive_order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+
+    for (auto _ : state) {
+        chain.DoMultiply(naive_order);
+        benchmark::DoNotOptimize(chain);
+    }
 }
 
-BENCHMARK(MatrixMultiply, Naive, 1, 10) {
-    auto mat = chain.DoMultiply(naive_order);
+static void BM_OptimalMatrixMultiply(benchmark::State& state) {
+    auto chain = CreateMatrixChain();
+    std::vector<size_t> optimal_order = chain.GetOptimalMultiplyCountOrder().second;
+
+    for (auto _ : state) {
+        chain.DoMultiply(optimal_order);
+        benchmark::DoNotOptimize(chain);
+    }
 }
 
-int main() {
+BENCHMARK(BM_NaiveMatrixMultiply);
+BENCHMARK(BM_OptimalMatrixMultiply);
+
+BENCHMARK_MAIN();
+
+matrix_chain::Chain<int> CreateMatrixChain() {
     matrix::Matrix<int> mat1{100, 1};
     for (size_t i = 0; i < 100; ++i)
         for (size_t j = 0; j < 1; ++j)
@@ -98,6 +104,7 @@ int main() {
         for (size_t j = 0; j < 10; ++j)
             mat15[i][j] = 13;
 
+    matrix_chain::Chain<int> chain;
     chain.Push(mat1);
     chain.Push(mat2);
     chain.Push(mat3);
@@ -113,11 +120,5 @@ int main() {
     chain.Push(mat13);
     chain.Push(mat14);
     chain.Push(mat15);
-
-    auto optim = chain.GetOptimalMultiplyCountOrder();
-    optim_order = optim.second;
-    naive_order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
-
-    hayai::MainRunner runner;
-    return runner.Run();
+    return chain;
 }

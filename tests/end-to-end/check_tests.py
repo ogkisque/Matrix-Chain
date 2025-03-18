@@ -1,12 +1,14 @@
+import sys
 from subprocess import run, Popen, PIPE
 from sys import executable
 
+generator = sys.argv[1]
 num_test = 1
 is_ok = True
 for i in range(1, 11):
-    str_data =  "tests/end-to-end/" + str(i) + ".dat"
+    str_data =  "tests/" + str(i) + ".dat"
     file_in = open(str_data, "r")
-    str_ans = "tests/end-to-end/" + str(i) + ".ans"
+    str_ans = "tests/" + str(i) + ".ans"
 
     ans_ord = []
     ans_mnoj = 0
@@ -18,7 +20,7 @@ for i in range(1, 11):
         else:
             ans_mnoj = float(i)
 	
-    result = run(["build/src/main_chain"], capture_output = True, encoding='cp866', stdin=file_in)
+    result = run([generator], capture_output = True, encoding='cp866', stdin=file_in)
     print("Test: " + str(num_test).strip())
 
     res = list(map(float, result.stdout.split()))

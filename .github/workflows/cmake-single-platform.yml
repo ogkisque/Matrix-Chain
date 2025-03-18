@@ -20,7 +20,7 @@ jobs:
         submodules: true
 
     - name: Install google-test, also install g++-
-      run: sudo apt-get install libgtest-dev googletest google-mock libboost-dev g++
+      run: sudo apt-get install libgtest-dev googletest google-mock libboost-dev libbenchmark-dev g++
 
     - name: CMake release config and build
       run: cmake -S . -B build -DWITH_TESTS=1 -DWITH_BENCHMARKS=1 -DCMAKE_BUILD_TYPE=Release; cmake --build build

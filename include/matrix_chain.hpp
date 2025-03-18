@@ -12,6 +12,13 @@ namespace matrix_chain {
 
 template <typename T>
 class Chain final {
+    struct DpResult {
+        size_t min_operations;
+        size_t split_point;
+    };
+
+    using DpTable = std::vector<std::vector<DpResult>>;
+
 public:
     void Push(const matrix::Matrix<T> &mat) {
         chain_.push_back(mat);
@@ -21,18 +28,18 @@ public:
             throw std::logic_error("Sizes of matrixes don't match");
 
         sizes_.push_back(chain_.back().GetColumnCount());
-        assert(chain_.size() + 1 == sizes_.size());
+        assert(chain_.size() + 1U == sizes_.size());
     }
 
     void Push(matrix::Matrix<T> &&mat) {
         chain_.push_back(std::move(mat));
-        if (chain_.size() == 1)
+        if (chain_.size() == 1U)
             sizes_.push_back(chain_.back().GetRowCount());
         else if (sizes_.back() != chain_.back().GetRowCount())
             throw std::logic_error("Sizes of matrixes don't match");
 
         sizes_.push_back(chain_.back().GetColumnCount());
-        assert(chain_.size() + 1 == sizes_.size());
+        assert(chain_.size() + 1U == sizes_.size());
     }
 
     template <typename... Args>
@@ -44,45 +51,42 @@ public:
             throw std::logic_error("Sizes of matrixes don't match");
 
         sizes_.push_back(chain_.back().GetColumnCount());
-        assert(chain_.size() + 1 == sizes_.size());
+        assert(chain_.size() + 1U == sizes_.size());
     }
 
-    std::pair<int, std::vector<int>> GetOptimalMultiplyCountOrder() const {
-        int n = sizes_.size() - 1;
-        std::vector<std::vector<int>> dp(n + 1, std::vector<int>(n + 1, 0));
-        std::vector<std::vector<int>> split(n + 1, std::vector<int>(n + 1, 0));
+    std::pair<size_t, std::vector<size_t>> GetOptimalMultiplyCountOrder() const {
+        size_t n = sizes_.size() - 1U;
+        DpTable dp(n + 1, std::vector<DpResult>(n + 1, {0, 0}));
 
-        for (int l = 2; l <= n; ++l) {
-            for (int i = 1; i <= n - l + 1; ++i) {
-                int j = i + l - 1;
-                dp[i][j] = std::numeric_limits<int>::max();
-                for (int k = i; k <= j - 1; ++k) {
-                    int val = dp[i][k] + dp[k + 1][j] + sizes_[i - 1] * sizes_[k] * sizes_[j];
-                    if (val < dp[i][j]) {
-                        dp[i][j] = val;
-                        split[i][j] = k;
-                    }
+        for (size_t l = 2U; l <= n; ++l) {
+            for (size_t i = 1U; i <= n - l + 1U; ++i) {
+                size_t j = i + l - 1U;
+
+                dp[i][j].min_operations = std::numeric_limits<size_t>::max();
+                for (size_t k = i; k <= j - 1U; ++k) {
+                    size_t val =
+                        dp[i][k].min_operations + dp[k + 1][j].min_operations + sizes_[i - 1] * sizes_[k] * sizes_[j];
+                    if (val < dp[i][j].min_operations)
+                        dp[i][j] = {val, k};
                 }
             }
         }
 
-        std::vector<int> order = GetOrderVector(1, n, split);
-        assert(order.size() + 1 == chain_.size());
-        return std::make_pair(dp[1][n], order);
+        std::vector<size_t> order = GetOrderVector(1, n, dp);
+        assert(order.size() + 1U == chain_.size());
+        return std::make_pair(dp[1][n].min_operations, order);
     }
 
-    int GetMultiplyCount() const {
-        int count = 0;
-        size_t size = sizes_.size();
+    size_t GetMultiplyCount() const {
+        size_t count = 0, size = sizes_.size(), tmp = sizes_[0];
 
-        for (int i = 1; i < size - 1; ++i) {
-            count += sizes_[0] * sizes_[i] * sizes_[i + 1];
-        }
+        for (int i = 1; i < size - 1U; ++i)
+            count += tmp * sizes_[i] * sizes_[i + 1];
 
         return count;
     }
 
-    matrix::Matrix<T> DoMultiply(const std::vector<int> &order) const {
+    matrix::Matrix<T> DoMultiply(const std::vector<size_t> &order) const {
         size_t order_size = order.size();
         size_t chain_size = chain_.size();
 
@@ -107,8 +111,7 @@ public:
             if (it_next == current_chain.end())
                 throw std::out_of_range(std::string("Invalid value of order") + std::to_string(i));
 
-            *it = *it * *it_next;
-
+            (*it) *= (*it_next);
             current_chain.erase(it_next);
 
             for (size_t j = 0; j < current_order.size(); ++j) {
@@ -121,15 +124,15 @@ public:
     }
 
 private:
-    static std::vector<int> GetOrderVector(int i, int j, std::vector<std::vector<int>> &split) {
+    static std::vector<size_t> GetOrderVector(size_t i, size_t j, DpTable &dp) {
         if (i == j)
             return {};
 
-        int k = split[i][j];
-        std::vector<int> left = GetOrderVector(i, k, split);
-        std::vector<int> right = GetOrderVector(k + 1, j, split);
+        size_t k = dp[i][j].split_point;
+        std::vector<size_t> left = GetOrderVector(i, k, dp);
+        std::vector<size_t> right = GetOrderVector(k + 1U, j, dp);
         left.insert(left.end(), right.begin(), right.end());
-        left.push_back(k - 1);
+        left.push_back(k - 1U);
         return left;
     }
 
@@ -142,7 +145,7 @@ private:
     }
 
     std::vector<matrix::Matrix<T>> chain_;
-    std::vector<int> sizes_;
+    std::vector<size_t> sizes_;
 };  // class Chain
 
 }  // namespace matrix_chain

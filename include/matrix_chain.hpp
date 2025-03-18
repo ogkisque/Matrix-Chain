@@ -78,10 +78,11 @@ public:
     }
 
     size_t GetMultiplyCount() const {
-        size_t count = 0, size = sizes_.size(), tmp = sizes_[0];
+        size_t count = 0, size = sizes_.size();
 
         for (int i = 1; i < size - 1U; ++i)
-            count += tmp * sizes_[i] * sizes_[i + 1];
+            count += sizes_[i] * sizes_[i + 1];
+        count *= sizes_[0];
 
         return count;
     }

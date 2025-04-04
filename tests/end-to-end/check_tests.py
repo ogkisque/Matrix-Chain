@@ -49,4 +49,5 @@ for i in range(1, 11):
 if is_ok:
 	print("TESTS PASSED")
 else:
-	print("TESTS FAILED")
+    print("TESTS FAILED")
+    sys.exit(1)

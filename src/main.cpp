@@ -39,14 +39,14 @@ int main() try {
     matrix_chain::Chain<int> chain;
     ProcessInput(chain, std::cin);
 
-    auto &&[optim_count, order] = chain.GetOptimalMultiplyCountOrder();
+    auto count_order_opt = chain.GetOptimalMultiplyCountOrder();
     size_t count = chain.GetMultiplyCount();
 
-    for (auto &&elem : order)
+    for (auto &&elem : count_order_opt.order)
         std::cout << elem << " "; std::cout << std::endl;
     
-    size_t difference = static_cast<double>(count) / optim_count;
-    auto &&result = chain.DoMultiply(order);
+    double difference = static_cast<double>(count) / count_order_opt.num_operations;
+    auto &&result = chain.DoMultiply(count_order_opt.order);
 
     if (std::fabs(std::round(difference) - difference) < 1e-5)
         std::cout << static_cast<long>(std::round(difference)) << std::endl;

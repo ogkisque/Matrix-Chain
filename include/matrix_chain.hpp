@@ -20,6 +20,12 @@ class Chain final {
     using DpTable = std::vector<std::vector<DpResult>>;
 
 public:
+    struct MultiplyCountOrder
+    {
+        size_t num_operations;
+        std::vector<size_t> order;
+    };
+
     void Push(const matrix::Matrix<T> &mat) {
         chain_.push_back(mat);
         if (chain_.size() == 1)
@@ -54,7 +60,7 @@ public:
         assert(chain_.size() + 1U == sizes_.size());
     }
 
-    std::pair<size_t, std::vector<size_t>> GetOptimalMultiplyCountOrder() const {
+    MultiplyCountOrder GetOptimalMultiplyCountOrder() const {
         size_t n = sizes_.size() - 1U;
         DpTable dp(n + 1, std::vector<DpResult>(n + 1, {0, 0}));
 
@@ -74,7 +80,7 @@ public:
 
         std::vector<size_t> order = GetOrderVector(1, n, dp);
         assert(order.size() + 1U == chain_.size());
-        return std::make_pair(dp[1][n].min_operations, order);
+        return MultiplyCountOrder{dp[1][n].min_operations, order};
     }
 
     size_t GetMultiplyCount() const {

@@ -15,10 +15,12 @@ static void BM_NaiveMatrixMultiply(benchmark::State& state) {
 
 static void BM_OptimalMatrixMultiply(benchmark::State& state) {
     auto chain = CreateMatrixChain();
-    std::vector<size_t> optimal_order = chain.GetOptimalMultiplyCountOrder().second;
+    auto count_order_opt = chain.GetOptimalMultiplyCountOrder();
+    auto optim_count = count_order_opt.num_operations;
+    auto&& order = count_order_opt.order;
 
     for (auto _ : state) {
-        chain.DoMultiply(optimal_order);
+        chain.DoMultiply(order);
         benchmark::DoNotOptimize(chain);
     }
 }

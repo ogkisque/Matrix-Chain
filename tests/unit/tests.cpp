@@ -72,8 +72,8 @@ TEST(MatrixChainTest, Multiply1) {
     auto&& order = count_order_opt.order;
     
     std::vector<size_t> native_order = {0, 1};
-    auto matrix1 = chain.DoMultiply(native_order);
-    auto matrix2 = chain.DoMultiply(order);
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);
     for (size_t i = 0; i < 4; ++i)
@@ -98,8 +98,8 @@ TEST(MatrixChainTest, Multiply2) {
     auto&& order = count_order_opt.order;
 
     std::vector<size_t> native_order = {0, 1, 2};
-    auto matrix1 = chain.DoMultiply(native_order);
-    auto matrix2 = chain.DoMultiply(order);
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);
 }
@@ -143,8 +143,8 @@ TEST(MatrixChainTest, Multiply3) {
     auto&& order = count_order_opt.order;
 
     std::vector<size_t> native_order = {0, 1, 2, 3};
-    auto matrix1 = chain.DoMultiply(native_order);
-    auto matrix2 = chain.DoMultiply(order);
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);
 }
@@ -188,8 +188,8 @@ TEST(MatrixChainTest, Multiply4) {
     auto&& order = count_order_opt.order;
 
     std::vector<size_t> native_order = {0, 1, 2, 3};
-    auto matrix1 = chain.DoMultiply(native_order);
-    auto matrix2 = chain.DoMultiply(order);
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);
 }
@@ -233,8 +233,8 @@ TEST(MatrixChainTest, PushMove) {
     auto&& order = count_order_opt.order;
 
     std::vector<size_t> native_order = {0, 1, 2, 3};
-    auto matrix1 = chain.DoMultiply(native_order);
-    auto matrix2 = chain.DoMultiply(order);
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);
 }
@@ -255,11 +255,59 @@ TEST(MatrixChainTest, Emplace) {
     auto&& order = count_order_opt.order;
 
     std::vector<size_t> native_order = {0, 1};
-    auto matrix1 = chain.DoMultiply(native_order);
-    auto matrix2 = chain.DoMultiply(order);
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);
     for (size_t i = 0; i < 4; ++i)
         for (size_t j = 0; j < 4; ++j)
             ASSERT_EQ(result[i * 4 + j], matrix1[i][j]);
+}
+
+TEST(MatrixChainTest, MultiplyNotMatrix1) {
+    std::vector<size_t> forder = {0, 1, 2, 3, 4, 5, 6};
+    std::vector<size_t> sorder = {4, 6, 3, 5, 1, 0, 2};
+    std::vector<int> int_chain1 {1, 2, 1, 0, -2, 1, 2, -1};
+    auto &&result1 = matrix_chain::DoMultiply(int_chain1.begin(), int_chain1.end(), forder);
+    auto &&result2 = matrix_chain::DoMultiply(int_chain1.begin(), int_chain1.end(), sorder);
+
+    ASSERT_EQ(result1, result2);
+    ASSERT_EQ(result1, 0);
+
+    std::vector<int> int_chain2 {1, 2, 1, 4, -2, 3, 2, -1};
+    auto &&result3 = matrix_chain::DoMultiply(int_chain2.begin(), int_chain2.end(), forder);
+    auto &&result4 = matrix_chain::DoMultiply(int_chain2.begin(), int_chain2.end(), sorder);
+
+    ASSERT_EQ(result3, result4);
+    ASSERT_EQ(result3, 2 * 4 * 2 * 3 * 2);
+}
+
+TEST(MatrixChainTest, MultiplyNotMatrix2) {
+    struct S {
+        int x;
+        S &operator*=(const S &other) {
+            x *= other.x;
+            return *this;
+        }
+
+        bool operator==(const S &other) const {
+            return (x == other.x);
+        }
+    };
+
+    std::vector<size_t> forder = {0, 1, 2, 3, 4, 5, 6};
+    std::vector<size_t> sorder = {4, 6, 3, 5, 1, 0, 2};
+    std::vector<S> chain1 {{1}, {2}, {1}, {0}, {-2}, {1}, {2}, {-1}};
+    S result1 = matrix_chain::DoMultiply(chain1.begin(), chain1.end(), forder);
+    S result2 = matrix_chain::DoMultiply(chain1.begin(), chain1.end(), sorder);
+
+    ASSERT_EQ(result1, result2);
+    ASSERT_EQ(result1, S{0});
+
+    std::vector<S> chain2 {{1}, {2}, {1}, {4}, {-2}, {3}, {2}, {-1}};
+    S result3 = matrix_chain::DoMultiply(chain2.begin(), chain2.end(), forder);
+    S result4 = matrix_chain::DoMultiply(chain2.begin(), chain2.end(), sorder);
+
+    ASSERT_EQ(result3, result4);
+    ASSERT_EQ(result3, S{2 * 4 * 2 * 3 * 2});
 }

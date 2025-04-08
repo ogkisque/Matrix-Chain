@@ -7,6 +7,8 @@
 #include <limits>
 #include <list>
 #include <vector>
+#include <utility>
+#include <type_traits>
 
 namespace matrix_chain {
 
@@ -20,38 +22,23 @@ class Chain final {
     using DpTable = std::vector<std::vector<DpResult>>;
 
 public:
-    struct MultiplyCountOrder
-    {
+    struct MultiplyCountOrder {
         size_t num_operations;
         std::vector<size_t> order;
     };
 
     void Push(const matrix::Matrix<T> &mat) {
-        chain_.push_back(mat);
-        if (chain_.size() == 1)
-            sizes_.push_back(chain_.back().GetRowCount());
-        else if (sizes_.back() != chain_.back().GetRowCount())
-            throw std::logic_error("Sizes of matrixes don't match");
-
-        sizes_.push_back(chain_.back().GetColumnCount());
-        assert(chain_.size() + 1U == sizes_.size());
+        Emplace(mat);
     }
 
     void Push(matrix::Matrix<T> &&mat) {
-        chain_.push_back(std::move(mat));
-        if (chain_.size() == 1U)
-            sizes_.push_back(chain_.back().GetRowCount());
-        else if (sizes_.back() != chain_.back().GetRowCount())
-            throw std::logic_error("Sizes of matrixes don't match");
-
-        sizes_.push_back(chain_.back().GetColumnCount());
-        assert(chain_.size() + 1U == sizes_.size());
+        Emplace(std::move(mat));
     }
 
     template <typename... Args>
     void Emplace(Args &&...args) {
         chain_.emplace_back(std::forward<Args>(args)...);
-        if (chain_.size() == 1)
+        if (chain_.size() == 1U)
             sizes_.push_back(chain_.back().GetRowCount());
         else if (sizes_.back() != chain_.back().GetRowCount())
             throw std::logic_error("Sizes of matrixes don't match");
@@ -101,43 +88,6 @@ public:
         return chain_.end();
     }
 
-    // matrix::Matrix<T> DoMultiply(const std::vector<size_t> &order) const {
-    //     size_t order_size = order.size();
-    //     size_t chain_size = chain_.size();
-
-    //     if (chain_.empty())
-    //         throw std::runtime_error("The chain of matrix is empty");
-    //     if (order.empty() || order_size + 1U != chain_size)
-    //         throw std::runtime_error("The order of multiplication is incorrect");
-
-    //     std::list<matrix::Matrix<T>> current_chain {chain_.begin(), chain_.end()};
-    //     auto current_order = order;
-
-    //     for (size_t i = 0; i < current_order.size(); ++i) {
-    //         int matrix_i = current_order[i];
-
-    //         if (matrix_i < 0 || matrix_i >= current_chain.size())
-    //             throw std::out_of_range("Invalid value of order");
-
-    //         auto it = current_chain.begin();
-    //         std::advance(it, matrix_i);
-    //         auto it_next = std::next(it);
-
-    //         if (it_next == current_chain.end())
-    //             throw std::out_of_range(std::string("Invalid value of order") + std::to_string(i));
-
-    //         (*it) *= (*it_next);
-    //         current_chain.erase(it_next);
-
-    //         for (size_t j = 0; j < current_order.size(); ++j) {
-    //             if (current_order[j] > matrix_i)
-    //                 current_order[j]--;
-    //         }
-    //     }
-
-    //     return current_chain.front();
-    // }
-
 private:
     static std::vector<size_t> GetOrderVector(size_t i, size_t j, DpTable &dp) {
         if (i == j)
@@ -163,10 +113,19 @@ private:
     std::vector<size_t> sizes_;
 };  // class Chain
 
-template <typename T, typename IterT>
-matrix::Matrix<T> DoMultiply(IterT begin, IterT end, const std::vector<size_t> &order) {
-    static_assert(std::iterator_traits<IterT>::value_type == matrix::Matrix<T>);
+template <typename T, typename = void>
+struct is_multipliable : std::false_type {};
 
+template <typename T>
+struct is_multipliable<T, std::void_t<decltype(std::declval<T&>() *= std::declval<T>())>> 
+        : std::true_type {};
+
+template <typename IterT>
+using value_type_t = typename std::iterator_traits<IterT>::value_type;
+
+template <typename IterT>
+std::enable_if_t<is_multipliable<value_type_t<IterT>>::value, value_type_t<IterT>>
+DoMultiply(IterT begin, IterT end, const std::vector<size_t> &order) {
     size_t order_size = order.size();
     size_t chain_size = std::distance(begin, end);
 
@@ -175,17 +134,17 @@ matrix::Matrix<T> DoMultiply(IterT begin, IterT end, const std::vector<size_t> &
     if (order_size == 0 || order_size + 1U != chain_size)
         throw std::runtime_error("The order of multiplication is incorrect");
 
-    std::list<matrix::Matrix<T>> current_chain {begin, end};
+    std::list<value_type_t<IterT>> current_chain {begin, end};
     auto current_order = order;
 
     for (size_t i = 0; i < current_order.size(); ++i) {
-        int matrix_i = current_order[i];
+        int elem_i = current_order[i];
 
-        if (matrix_i < 0 || matrix_i >= current_chain.size())
+        if (elem_i < 0 || elem_i >= current_chain.size())
             throw std::out_of_range("Invalid value of order");
 
         auto it = current_chain.begin();
-        std::advance(it, matrix_i);
+        std::advance(it, elem_i);
         auto it_next = std::next(it);
 
         if (it_next == current_chain.end())
@@ -195,12 +154,11 @@ matrix::Matrix<T> DoMultiply(IterT begin, IterT end, const std::vector<size_t> &
         current_chain.erase(it_next);
 
         for (size_t j = 0; j < current_order.size(); ++j) {
-            if (current_order[j] > matrix_i)
+            if (current_order[j] > elem_i)
                 current_order[j]--;
         }
     }
 
     return current_chain.front();
 }
-
 }  // namespace matrix_chain

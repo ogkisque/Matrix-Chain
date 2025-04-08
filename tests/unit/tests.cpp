@@ -71,8 +71,8 @@ TEST(MatrixChainTest, Multiply1) {
     auto optim_count = count_order_opt.num_operations;
     auto&& order = count_order_opt.order;
     
-    std::vector<size_t> native_order = {0, 1};
-    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    std::vector<size_t> naive_order = {0, 1};
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), naive_order);
     auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);
@@ -97,8 +97,8 @@ TEST(MatrixChainTest, Multiply2) {
     auto optim_count = count_order_opt.num_operations;
     auto&& order = count_order_opt.order;
 
-    std::vector<size_t> native_order = {0, 1, 2};
-    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    std::vector<size_t> naive_order = {0, 1, 2};
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), naive_order);
     auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);
@@ -142,8 +142,8 @@ TEST(MatrixChainTest, Multiply3) {
     auto optim_count = count_order_opt.num_operations;
     auto&& order = count_order_opt.order;
 
-    std::vector<size_t> native_order = {0, 1, 2, 3};
-    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    std::vector<size_t> naive_order = {0, 1, 2, 3};
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), naive_order);
     auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);
@@ -187,8 +187,8 @@ TEST(MatrixChainTest, Multiply4) {
     auto optim_count = count_order_opt.num_operations;
     auto&& order = count_order_opt.order;
 
-    std::vector<size_t> native_order = {0, 1, 2, 3};
-    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    std::vector<size_t> naive_order = {0, 1, 2, 3};
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), naive_order);
     auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);
@@ -232,8 +232,8 @@ TEST(MatrixChainTest, PushMove) {
     auto optim_count = count_order_opt.num_operations;
     auto&& order = count_order_opt.order;
 
-    std::vector<size_t> native_order = {0, 1, 2, 3};
-    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    std::vector<size_t> naive_order = {0, 1, 2, 3};
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), naive_order);
     auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);
@@ -254,8 +254,8 @@ TEST(MatrixChainTest, Emplace) {
     auto optim_count = count_order_opt.num_operations;
     auto&& order = count_order_opt.order;
 
-    std::vector<size_t> native_order = {0, 1};
-    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+    std::vector<size_t> naive_order = {0, 1};
+    auto &&matrix1 = matrix_chain::DoMultiply(chain.begin(), chain.end(), naive_order);
     auto &&matrix2 = matrix_chain::DoMultiply(chain.begin(), chain.end(), order);
 
     ASSERT_EQ(matrix1, matrix2);

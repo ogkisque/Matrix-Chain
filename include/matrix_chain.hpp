@@ -93,42 +93,50 @@ public:
         return count;
     }
 
-    matrix::Matrix<T> DoMultiply(const std::vector<size_t> &order) const {
-        size_t order_size = order.size();
-        size_t chain_size = chain_.size();
-
-        if (chain_.empty())
-            throw std::runtime_error("The chain of matrix is empty");
-        if (order.empty() || order_size + 1U != chain_size)
-            throw std::runtime_error("The order of multiplication is incorrect");
-
-        std::list<matrix::Matrix<T>> current_chain {chain_.begin(), chain_.end()};
-        auto current_order = order;
-
-        for (size_t i = 0; i < current_order.size(); ++i) {
-            int matrix_i = current_order[i];
-
-            if (matrix_i < 0 || matrix_i >= current_chain.size())
-                throw std::out_of_range("Invalid value of order");
-
-            auto it = current_chain.begin();
-            std::advance(it, matrix_i);
-            auto it_next = std::next(it);
-
-            if (it_next == current_chain.end())
-                throw std::out_of_range(std::string("Invalid value of order") + std::to_string(i));
-
-            (*it) *= (*it_next);
-            current_chain.erase(it_next);
-
-            for (size_t j = 0; j < current_order.size(); ++j) {
-                if (current_order[j] > matrix_i)
-                    current_order[j]--;
-            }
-        }
-
-        return current_chain.front();
+    inline auto begin() {
+        return chain_.begin();
     }
+
+    inline auto end() {
+        return chain_.end();
+    }
+
+    // matrix::Matrix<T> DoMultiply(const std::vector<size_t> &order) const {
+    //     size_t order_size = order.size();
+    //     size_t chain_size = chain_.size();
+
+    //     if (chain_.empty())
+    //         throw std::runtime_error("The chain of matrix is empty");
+    //     if (order.empty() || order_size + 1U != chain_size)
+    //         throw std::runtime_error("The order of multiplication is incorrect");
+
+    //     std::list<matrix::Matrix<T>> current_chain {chain_.begin(), chain_.end()};
+    //     auto current_order = order;
+
+    //     for (size_t i = 0; i < current_order.size(); ++i) {
+    //         int matrix_i = current_order[i];
+
+    //         if (matrix_i < 0 || matrix_i >= current_chain.size())
+    //             throw std::out_of_range("Invalid value of order");
+
+    //         auto it = current_chain.begin();
+    //         std::advance(it, matrix_i);
+    //         auto it_next = std::next(it);
+
+    //         if (it_next == current_chain.end())
+    //             throw std::out_of_range(std::string("Invalid value of order") + std::to_string(i));
+
+    //         (*it) *= (*it_next);
+    //         current_chain.erase(it_next);
+
+    //         for (size_t j = 0; j < current_order.size(); ++j) {
+    //             if (current_order[j] > matrix_i)
+    //                 current_order[j]--;
+    //         }
+    //     }
+
+    //     return current_chain.front();
+    // }
 
 private:
     static std::vector<size_t> GetOrderVector(size_t i, size_t j, DpTable &dp) {
@@ -154,5 +162,45 @@ private:
     std::vector<matrix::Matrix<T>> chain_;
     std::vector<size_t> sizes_;
 };  // class Chain
+
+template <typename T, typename IterT>
+matrix::Matrix<T> DoMultiply(IterT begin, IterT end, const std::vector<size_t> &order) {
+    static_assert(std::iterator_traits<IterT>::value_type == matrix::Matrix<T>);
+
+    size_t order_size = order.size();
+    size_t chain_size = std::distance(begin, end);
+
+    if (chain_size == 0)
+        throw std::runtime_error("The chain of matrix is empty");
+    if (order_size == 0 || order_size + 1U != chain_size)
+        throw std::runtime_error("The order of multiplication is incorrect");
+
+    std::list<matrix::Matrix<T>> current_chain {begin, end};
+    auto current_order = order;
+
+    for (size_t i = 0; i < current_order.size(); ++i) {
+        int matrix_i = current_order[i];
+
+        if (matrix_i < 0 || matrix_i >= current_chain.size())
+            throw std::out_of_range("Invalid value of order");
+
+        auto it = current_chain.begin();
+        std::advance(it, matrix_i);
+        auto it_next = std::next(it);
+
+        if (it_next == current_chain.end())
+            throw std::out_of_range(std::string("Invalid value of order") + std::to_string(i));
+
+        (*it) *= (*it_next);
+        current_chain.erase(it_next);
+
+        for (size_t j = 0; j < current_order.size(); ++j) {
+            if (current_order[j] > matrix_i)
+                current_order[j]--;
+        }
+    }
+
+    return current_chain.front();
+}
 
 }  // namespace matrix_chain

@@ -46,7 +46,7 @@ int main() try {
         std::cout << elem << " "; std::cout << std::endl;
     
     double difference = static_cast<double>(count) / count_order_opt.num_operations;
-    auto &&result = chain.DoMultiply(count_order_opt.order);
+    auto &&result = matrix_chain::DoMultiply<int>(chain.begin(), chain.end(), count_order_opt.order);
 
     if (std::fabs(std::round(difference) - difference) < 1e-5)
         std::cout << static_cast<long>(std::round(difference)) << std::endl;

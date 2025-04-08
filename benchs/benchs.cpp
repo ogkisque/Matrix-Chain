@@ -5,10 +5,10 @@ matrix_chain::Chain<int> CreateMatrixChain();
 
 static void BM_NaiveMatrixMultiply(benchmark::State& state) {
     auto chain = CreateMatrixChain();
-    std::vector<size_t> native_order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    std::vector<size_t> naive_order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
 
     for (auto _ : state) {
-        matrix_chain::DoMultiply(chain.begin(), chain.end(), native_order);
+        matrix_chain::DoMultiply(chain.begin(), chain.end(), naive_order);
         benchmark::DoNotOptimize(chain);
     }
 }

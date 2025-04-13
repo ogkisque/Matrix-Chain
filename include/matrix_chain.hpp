@@ -80,11 +80,11 @@ public:
         return count;
     }
 
-    inline auto begin() {
+    auto begin() {
         return chain_.begin();
     }
 
-    inline auto end() {
+    auto end() {
         return chain_.end();
     }
 
@@ -113,19 +113,8 @@ private:
     std::vector<size_t> sizes_;
 };  // class Chain
 
-template <typename T, typename = void>
-struct is_multipliable : std::false_type {};
-
-template <typename T>
-struct is_multipliable<T, std::void_t<decltype(std::declval<T&>() *= std::declval<T>())>> 
-        : std::true_type {};
-
 template <typename IterT>
-using value_type_t = typename std::iterator_traits<IterT>::value_type;
-
-template <typename IterT>
-std::enable_if_t<is_multipliable<value_type_t<IterT>>::value, value_type_t<IterT>>
-DoMultiply(IterT begin, IterT end, const std::vector<size_t> &order) {
+std::iter_value_t<IterT> DoMultiply(IterT begin, IterT end, const std::vector<size_t> &order) {
     size_t order_size = order.size();
     size_t chain_size = std::distance(begin, end);
 
@@ -134,7 +123,7 @@ DoMultiply(IterT begin, IterT end, const std::vector<size_t> &order) {
     if (order_size == 0 || order_size + 1U != chain_size)
         throw std::runtime_error("The order of multiplication is incorrect");
 
-    std::list<value_type_t<IterT>> current_chain {begin, end};
+    std::list<std::iter_value_t<IterT>> current_chain {begin, end};
     auto current_order = order;
 
     for (size_t i = 0; i < current_order.size(); ++i) {

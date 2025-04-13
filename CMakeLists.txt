@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=leak,address,undefined")
 
 enable_testing()
+add_subdirectory(Matrix)
 add_subdirectory(src)
 
 if (WITH_TESTS)
